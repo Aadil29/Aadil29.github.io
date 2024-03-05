@@ -78,7 +78,7 @@ body {
     position: absolute;
     left: 0;
     min-width: 180px;
-    box-shadow: 0px 8px 16px 0px transparent(0,0,0,0.2);
+    #box-shadow: 0px 8px 16px 0px rgba(255,255,255,0.5);
     padding: 10px 0; /* Adjust padding for better spacing */
     border-radius: 5px; /* Rounded corners for modern look */
 
@@ -240,6 +240,20 @@ h2{
 }
 
 
+
+.project-thumbnails-ios img {
+    transition: transform 0.3s ease; /* Smooth transition for the transform effect */
+    margin: 10px; /* Add some space around images */
+    border: 2px solid transparent; /* Transparent border to prevent layout shift when scaling */
+}
+
+.project-thumbnails-ios img:hover {
+    transform: scale(1.05); /* Scale the image up to 105% of its original size on hover */
+
+    z-index: 10; /* Ensure the scaled image is above the others */
+}
+
+
 .project-video {
     margin-top: 20px; /* Add space between the images and the video */
     max-width: 500px; /* Max width for the video */
@@ -311,12 +325,17 @@ video {
 }
 
 .project-1 {
-    background-color: #0f3460; /* Color for odd projects */
+    background-color: #1f5ea8; /* Deep blue shade for odd projects */
 }
 
 .project-2 {
-    background-color: #16213e; /* Different color for even projects */
+    background-color: #007bff; /* Bright blue shade for odd projects */
 }
+
+.project-3 {
+    background-color: #2c3e50; /* Subtle blue shade for even projects */
+}
+
 
 
 @media screen and (max-width: 768px) {
