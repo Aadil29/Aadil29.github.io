@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muhammad Aadil Ghani Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+
+    <header class="header">
+        <a href="#" class="logo"></a>
+        <nav class="navbar">
+            <a href="#home">Home</a>
+            <div class="dropdown">
+                <span class="project-heading">Projects</span>
+                <div class="project-titles">
+                    <a href="#project-1">Java 2D Platform Game</a>
+                    <a href="#project-2">AI Phishing Email Detector</a>
+                </div>
+            </div>
+            <a href="#contact-me">Contact Me</a>
+        </nav>
+    </header>
+    
+
+<section id="home" class="Home">
+    <div class="Home-content">
+        <h1>Welcome to My Portfolio</h1>
+        <h3>Muhammad Aadil Ghani - Aspiring Cyber Security Expert</h3>
+        <p>Delve into my world of cyber security, where I showcase my projects and skills, highlighting my journey and dedication in the field of technology and security.</p>
+    </div>
+    <div class="home-sci">
+        <a href="https://www.linkedin.com/in/muhmmad-aadil-ghani/" target="_blank"><i class='bx bxl-linkedin'></i></a>
+        <a href="https://github.com/Aadil29" target="_blank"><i class='bx bxl-github'></i></a>
+    </div>
+</section>
+
+<section id="projects" class="projects">
+    <div id="project-1" class="project-content project-1">
+        <h1>Java 2D Platform Game</h1>
+        <p>My first java game development project is about a game I created called gravity flip. During the development,
+            I gained and solidified my knowledge of Object-oriented programming, which included concepts such as Inheritance, Encapsulation, Polymorphism, and Abstraction.</p>
+        <div class="project-thumbnails">
+            <img src="GamepicL1.png" alt="Game Level 1">
+            <img src="GamepicL2.png" alt="Game Level 2">
+            <img src="GamepicL3.png" alt="Game Level 3">
+        </div>
+        <div class="project-video">
+            <video controls>
+                <source src="game video.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+
+    <div id="project-2" class="project-content project-2">
+        <h1>"COMMING SOON"</h1>       
+        <h2>AI Phishing Email Detector</h2>
+        <p>
+            This project involves creating a web application that utilizes artificial 
+            intelligence to distinguish between phishing and valid emails. 
+            Users can input an email address, and 
+            the system will identify potential phishing attempts, enhancing online security.
+
+
+
+
+
+
+
+
+           . 
+        </p>
+
+    </div>
+</section>
+
+<section id="contact-me" class="contact-me">
+    <div class="contact-me-content">
+        <h2>Contact Me</h2>
+        <div class="contact-item">
+            <i class='bx bx-envelope'></i>
+            <span class="contact-text">mohammadghani2003@gmail.com</span>
+        </div>
+    </div>
+</section>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.navbar a');
+
+    function changeLinkState() {
+        let index = sections.length;
+
+        while (--index && !isSectionInView(sections[index])) {}
+
+        navLinks.forEach((link) => link.classList.remove('active'));
+        if (index >= 0) navLinks[index].classList.add('active');
+    }
+
+    function isSectionInView(section) {
+        const scrollPosition = window.scrollY;
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+        const pageBottom = scrollPosition + window.innerHeight;
+
+        // Check if the section is at the bottom of the page and in view
+        const isAtBottom = (window.innerHeight + window.scrollY) >= document.body.offsetHeight;
+        const isInView = (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) ||
+            (isAtBottom && sectionTop + sectionHeight >= pageBottom);
+
+        return isInView;
+    }
+
+    changeLinkState();
+    window.addEventListener('scroll', changeLinkState);
+});
+
+
+</script>
+
+
+
+
+</body>
+</html>
+
+
+
