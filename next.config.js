@@ -5,7 +5,7 @@ const isProduction = process.env.NODE_ENV === "production";
 const nextConfig = {
   basePath: isProduction ? "/Aadil29.github.io" : "",
   output: "export", // This makes it a static site
-  distDir: "dist", // Missing comma was here
+
   sassOptions: {
     includePaths: [path.join(__dirname, "styles")],
   },
