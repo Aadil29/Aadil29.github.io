@@ -1,7 +1,9 @@
 const path = require("path");
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const nextConfig = {
-  basePath: "/Aadil29.github.io",
+  basePath: isProduction ? "/Aadil29.github.io" : "",
   output: "export", // This makes it a static site
   distDir: "dist", // Missing comma was here
   sassOptions: {
@@ -9,8 +11,6 @@ const nextConfig = {
   },
   images: {
     unoptimized: true, // Required for static export
-    loader: "custom",
-    loaderFile: "./ImageLoader.js",
     remotePatterns: [
       {
         protocol: "https",
