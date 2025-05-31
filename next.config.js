@@ -9,6 +9,8 @@ const nextConfig = {
   },
   images: {
     unoptimized: true, // Required for static export
+    loader: "custom",
+    loaderFile: "./ImageLoader.js",
     remotePatterns: [
       {
         protocol: "https",
