@@ -91,25 +91,25 @@ export const projectImages = {
   5: [
     // EV Charging Station App
     {
-      src: "/ProjectPics/EvChargingStation/ChargerAvailabilityCalendar.jpg",
+      src: "./ProjectPics/EvChargingStation/ChargerAvailabilityCalendar.jpg",
       alt: "Charger Availability Calendar View",
       caption:
         "The charger availability screen displaying a calendar for date selection (e.g., January 8, 2025) and available time slots for booking chargers at a station.",
     },
     {
-      src: "/ProjectPics/EvChargingStation/BookingReservationTimeSlots.jpg",
+      src: "./ProjectPics/EvChargingStation/BookingReservationTimeSlots.jpg",
       alt: "Booking Reservation with Time Slot Selection",
       caption:
         "The booking reservation interface where users select a date, a specific charger (e.g., 'Charger charger2'), and view available time slots for their charging session.",
     },
     {
-      src: "/ProjectPics/EvChargingStation/ForgotPasswordScreen.jpg",
+      src: "./ProjectPics/EvChargingStation/ForgotPasswordScreen.jpg",
       alt: "Forgot Password Screen",
       caption:
         "The 'Forgot Your Password?' screen, enabling users to reset their password by entering their registered email address to receive a reset link.",
     },
     {
-      src: "/ProjectPics/EvChargingStation/AnalyticsDashboard.jpg",
+      src: "./ProjectPics/EvChargingStation/AnalyticsDashboard.jpg",
       alt: "Analytics Dashboard with Peak Charging Times and Energy Consumption",
       caption:
         "The Analytics Dashboard providing insights into usage patterns, including a bar chart for peak charging times and a line graph illustrating energy consumption trends.",
