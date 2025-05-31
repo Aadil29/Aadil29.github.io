@@ -1,71 +1,153 @@
-// @flow strict
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  ZoomIn,
+  Play,
+  Pause,
+} from "lucide-react";
+import MediaViewer from "./MediaViewer";
+import { projectImages } from "./constants"; // Import projectImages
 
 function ProjectCard({ project }) {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  const [showAllTech, setShowAllTech] = React.useState(false);
+
+  // Filter images for the current project
+  const images = projectImages[project.id] || [];
+  const hasImages = images.length > 0;
 
   return (
-    <div className="from-[#0d1224] border-[#1b2c68a0] relative rounded-lg border bg-gradient-to-r to-[#0a0d37] w-full">
-      <div className="flex flex-row">
-        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-pink-500 to-violet-600"></div>
-        <div className="h-[1px] w-full bg-gradient-to-r from-violet-600 to-transparent"></div>
-      </div>
-      <div className="px-4 lg:px-8 py-3 lg:py-5 relative">
-        <div className="flex flex-row space-x-1 lg:space-x-2 absolute top-1/2 -translate-y-1/2">
-          <div className="h-2 w-2 lg:h-3 lg:w-3 rounded-full bg-red-400"></div>
-          <div className="h-2 w-2 lg:h-3 lg:w-3 rounded-full bg-orange-400"></div>
-          <div className="h-2 w-2 lg:h-3 lg:w-3 rounded-full bg-green-200"></div>
+    <>
+      <div className="from-[#0d1224] border-[#1b2c68a0] relative rounded-xl border bg-gradient-to-r to-[#0a0d37] w-full overflow-hidden">
+        {/* Header with decorative elements */}
+        <div className="flex flex-row">
+          <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-red-400 to-violet-600"></div>
+          <div className="h-[1px] w-full bg-gradient-to-r from-violet-600 to-transparent"></div>
         </div>
-        <p className="text-center ml-3 text-[#16f2b3] text-base lg:text-xl">
-          {project.name}
-        </p>
-      </div>
-      <div className="overflow-hidden border-t-[2px] border-indigo-900 px-4 lg:px-8 py-4 lg:py-8">
-        <code className="font-mono text-xs md:text-sm lg:text-base">
-          <div className="blink">
-            <span className="mr-2 text-pink-500">const</span>
-            <span className="mr-2 text-white">project</span>
-            <span className="mr-2 text-pink-500">=</span>
-            <span className="text-gray-400">{'{'}</span>
+
+        {/* Title Bar */}
+        <div className="px-4 lg:px-8 py-3 lg:py-4 relative bg-[#0a0d37]/50">
+          <div className="flex flex-row space-x-1 lg:space-x-2 absolute top-1/2 -translate-y-1/2">
+            <div className="h-2 w-2 lg:h-3 lg:w-3 rounded-full bg-red-400"></div>
+            <div className="h-2 w-2 lg:h-3 lg:w-3 rounded-full bg-orange-400"></div>
+            <div className="h-2 w-2 lg:h-3 lg:w-3 rounded-full bg-green-200"></div>
           </div>
-          <div>
-            <span className="ml-4 lg:ml-8 mr-2 text-white">name:</span>
-            <span className="text-gray-400">{`'`}</span>
-            <span className="text-amber-300">{project.name}</span>
-            <span className="text-gray-400">{`',`}</span>
+          <h3 className="text-center ml-3 text-[#16f2b3] text-base lg:text-xl font-semibold break-words">
+            {project.name}
+          </h3>
+        </div>
+
+        {/* Main Content */}
+        <div className="border-t-[2px] border-indigo-900 p-6 lg:p-8 space-y-6">
+          {/* Project Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left Column - Role & Key Info */}
+            <div className="space-y-4">
+              <div className="bg-[#1a1443]/50 rounded-lg p-4 border border-pink-500/20">
+                <h4 className="text-pink-500 font-semibold text-sm uppercase tracking-wide mb-2">
+                  My Role
+                </h4>
+                <p className="text-white text-lg font-medium">{project.role}</p>
+              </div>
+
+              {/* Tech Stack - Now shows all technologies */}
+              <div className="bg-[#1a1443]/50 rounded-lg p-4 border border-[#16f2b3]/20">
+                <h4 className="text-[#16f2b3] font-semibold text-sm uppercase tracking-wide mb-3">
+                  Tech Stack
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {project.tools
+                    .slice(0, showAllTech ? project.tools.length : 6)
+                    .map((tool, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1 bg-gradient-to-r from-violet-600/20 to-pink-500/20 border border-violet-600/30 rounded-full text-amber-300 text-xs font-medium"
+                      >
+                        {tool}
+                      </span>
+                    ))}
+                </div>
+                {project.tools.length > 6 && (
+                  <button
+                    onClick={() => setShowAllTech(!showAllTech)}
+                    className="mt-3 text-[#16f2b3] hover:text-pink-500 text-xs font-medium transition-colors duration-200 flex items-center gap-1"
+                  >
+                    {showAllTech
+                      ? "Show Less"
+                      : `Show All ${project.tools.length} Technologies`}
+                    <svg
+                      className={`w-3 h-3 transition-transform duration-200 ${
+                        showAllTech ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column - Project Media Gallery handled by MediaViewer */}
+            <MediaViewer images={images} hasImages={hasImages} />
           </div>
 
-          <div className="ml-4 lg:ml-8 mr-2">
-            <span className=" text-white">tools:</span>
-            <span className="text-gray-400">{` ['`}</span>
-            {
-              project.tools.map((tag, i) => (
-                <React.Fragment key={i}>
-                  <span className="text-amber-300">{tag}</span>
-                  {
-                    project.tools?.length - 1 !== i &&
-                    <span className="text-gray-400">{`', '`}</span>
-                  }
-                </React.Fragment>
-              ))
-            }
-            <span className="text-gray-400">{"],"}</span>
+          {/* Description */}
+          <div className="space-y-4">
+            <h4 className="text-white font-semibold text-lg flex items-center gap-2">
+              <div className="w-1 h-6 bg-gradient-to-b from-pink-500 to-[#16f2b3] rounded-full"></div>
+              Project Description
+            </h4>
+
+            <div className="relative">
+              <p
+                className={`text-gray-300 text-sm lg:text-base leading-relaxed transition-all duration-300 ${
+                  isExpanded ? "" : "line-clamp-3"
+                }`}
+              >
+                {project.description}
+              </p>
+
+              {project.description.length > 200 && (
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="mt-2 text-[#16f2b3] hover:text-pink-500 text-sm font-medium transition-colors duration-200 flex items-center gap-1"
+                >
+                  {isExpanded ? "Read Less" : "Read More"}
+                  <svg
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      isExpanded ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
-          <div>
-            <span className="ml-4 lg:ml-8 mr-2 text-white">myRole:</span>
-            <span className="text-orange-400">{project.role}</span>
-            <span className="text-gray-400">,</span>
-          </div>
-          <div className="ml-4 lg:ml-8 mr-2">
-            <span className="text-white">Description:</span>
-            <span className="text-cyan-400">{' ' + project.description}</span>
-            <span className="text-gray-400">,</span>
-          </div>
-          <div><span className="text-gray-400">{`};`}</span></div>
-        </code>
+        </div>
       </div>
-    </div>
+    </>
   );
-};
+}
 
 export default ProjectCard;

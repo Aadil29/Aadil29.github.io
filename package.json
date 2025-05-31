@@ -1,6 +1,6 @@
 {
   "name": "developer-portfolio",
-  "description": "Portfolio of Abu Said",
+  "description": "Portfolio of Aadil Ghani",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -14,7 +14,8 @@
     "@next/third-parties": "15.1.1",
     "axios": "^1.6.8",
     "lottie-react": "^2.4.1",
-    "next": "15.1.1",
+    "lucide-react": "^0.511.0",
+    "next": "^15.1.8",
     "nodemailer": "^6.9.15",
     "react": "19.0.0",
     "react-dom": "19.0.0",
@@ -25,6 +26,7 @@
     "sharp": "^0.33.5"
   },
   "devDependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
     "autoprefixer": "latest",
     "eslint": "latest",
     "eslint-config-next": "15.1.1",
