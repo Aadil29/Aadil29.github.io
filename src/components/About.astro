@@ -1,0 +1,50 @@
+---
+import { siteConfig } from "../config";
+---
+
+<section id="about" class="p-8 sm:p-12 md:p-16 lg:p-24">
+  <div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+      <div class="lg:col-span-4">
+        <h2
+          class="text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-bold text-slate-100"
+        >
+          About Me
+        </h2>
+        <div
+          class="w-[75px] h-[5px] mt-2 rounded-full"
+          style={`background-color: ${siteConfig.accentColor}`}
+        >
+        </div>
+      </div>
+
+      <div class="lg:col-span-8 space-y-10">
+        <p class="text-lg sm:text-xl md:text-2xl leading-relaxed text-slate-400">
+          {siteConfig.aboutMe}
+        </p>
+
+        <div class="space-y-6">
+          {
+            siteConfig.skills.map((group) => (
+              <div>
+                <p
+                  class="text-xs font-mono uppercase tracking-widest mb-3"
+                  style={`color: ${siteConfig.accentColor}`}
+                >
+                  {group.category}
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  {group.items.map((skill) => (
+                    <span class="px-3 py-1.5 bg-slate-800 text-slate-200 rounded-full text-sm font-medium hover:bg-slate-700 transition-colors duration-200 border border-slate-700">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
