@@ -4,7 +4,6 @@ import { siteConfig } from "../config";
 const hasProjects = siteConfig.projects && siteConfig.projects.length > 0;
 const hasExperience = siteConfig.experience && siteConfig.experience.length > 0;
 const hasEducation = siteConfig.education && siteConfig.education.length > 0;
-const hasBlog = "blog" in siteConfig && siteConfig.blog;
 ---
 
 <footer class="relative bg-slate-900 border-t border-slate-700">
@@ -96,18 +95,6 @@ const hasBlog = "blog" in siteConfig && siteConfig.blog;
             >
           </a>
         </div>
-        {
-          hasBlog && (
-            <a
-              href={siteConfig.blog}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-sm text-slate-500 hover:text-[var(--accent-color)] transition-colors duration-300"
-              style={`--accent-color: ${siteConfig.accentColor}`}
-            >
-            </a>
-          )
-        }
       </div>
 
       <div class="hidden md:block flex flex-col md:items-end gap-4">
