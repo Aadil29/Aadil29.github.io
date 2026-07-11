@@ -19,6 +19,10 @@ const hasImages = details?.images && details.images.length > 0;
 const hasVideo = details?.videoUrl && details.videoUrl.length > 0;
 const hasHighlights = details?.highlights && details.highlights.length > 0;
 const hasRepo = details?.repoUrl && details.repoUrl.length > 0;
+const sections = (details as any)?.sections as
+  | { heading: string; body?: string; bullets?: string[] }[]
+  | undefined;
+const hasSections = sections && sections.length > 0;
 ---
 
 <html lang="en">
@@ -31,6 +35,24 @@ const hasRepo = details?.repoUrl && details.repoUrl.length > 0;
       name="description"
       content={`${project.name} — ${siteConfig.name}`}
     />
+
+    <!-- Open Graph / social preview -->
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={`${project.name} — ${siteConfig.name}`} />
+    <meta property="og:description" content={project.description} />
+    <meta
+      property="og:url"
+      content={new URL(`/projects/${project.slug}`, Astro.site)}
+    />
+    <meta property="og:image" content={new URL("/og.png", Astro.site)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content={`${project.name} — ${siteConfig.name}`}
+    />
+    <meta name="twitter:description" content={project.description} />
+    <meta name="twitter:image" content={new URL("/og.png", Astro.site)} />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -155,6 +177,41 @@ const hasRepo = details?.repoUrl && details.repoUrl.length > 0;
                 </li>
               ))}
             </ul>
+          </div>
+        )
+      }
+
+      <!-- Sections — optional deep-dive content -->
+      {
+        hasSections && (
+          <div class="mb-12 space-y-10">
+            {sections!.map((section) => (
+              <div>
+                <h2 class="text-xl font-semibold text-slate-100 mb-4">
+                  {section.heading}
+                </h2>
+                {section.body && (
+                  <p class="text-slate-400 text-base leading-relaxed">
+                    {section.body}
+                  </p>
+                )}
+                {section.bullets && section.bullets.length > 0 && (
+                  <ul class="space-y-3 mt-4">
+                    {section.bullets.map((point) => (
+                      <li class="flex items-start gap-3">
+                        <span
+                          class="mt-2 w-1.5 h-1.5 rounded-full flex-shrink-0"
+                          style={`background-color: ${siteConfig.accentColor}`}
+                        />
+                        <span class="text-slate-400 text-base leading-relaxed">
+                          {point}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
           </div>
         )
       }
