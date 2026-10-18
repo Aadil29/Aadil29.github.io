@@ -1,0 +1,29 @@
+---
+// <picture> with automatic WebP sibling and intrinsic width/height (no layout shift).
+import { imageInfo } from "../lib/media";
+
+interface Props {
+  src: string;
+  alt: string;
+  class?: string;
+  imgClass?: string;
+  loading?: "lazy" | "eager";
+  fetchpriority?: "high" | "low" | "auto";
+  sizes?: string;
+}
+const { src, alt, class: className, imgClass, loading = "lazy", fetchpriority, sizes } = Astro.props;
+const info = imageInfo(src);
+---
+<picture class={className}>
+  {info.webp && <source srcset={info.webp} type="image/webp" sizes={sizes} />}
+  <img
+    src={info.src}
+    alt={alt}
+    width={info.width}
+    height={info.height}
+    loading={loading}
+    decoding="async"
+    fetchpriority={fetchpriority}
+    class={imgClass}
+  />
+</picture>

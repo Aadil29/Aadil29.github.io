@@ -19,7 +19,8 @@ This is a modern portfolio template built with Astro and Tailwind CSS v4. The pr
 
 ### Styling
 - Use Tailwind CSS utility classes exclusively
-- Maintain the monospace font aesthetic (IBM Plex Mono)
+- Use the system font stack (SF Pro on Apple devices, Inter fallback); monospace only for figures and tags
+- Follow the design and contrast rules in CLAUDE.md
 - Follow the existing spacing and layout patterns
 - Use the accent color from config for themed elements
 

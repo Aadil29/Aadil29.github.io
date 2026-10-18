@@ -1,296 +1,298 @@
 ---
+import Base from "../../layouts/Base.astro";
+import Icon, { type IconName } from "../../components/Icon.astro";
+import Picture from "../../components/Picture.astro";
+import ProjectMedia from "../../components/ProjectMedia.astro";
 import { siteConfig } from "../../config";
-import "../../styles/global.css";
 
 export function getStaticPaths() {
-  return siteConfig.projects
+  return (siteConfig.projects ?? [])
     .filter((p) => p.slug)
     .map((p) => ({ params: { slug: p.slug } }));
 }
 
+const projects = (siteConfig.projects ?? []).filter((p) => p.slug);
 const { slug } = Astro.params;
-const projectIndex = siteConfig.projects.findIndex((p) => p.slug === slug);
-const project = siteConfig.projects[projectIndex];
-
+const index = projects.findIndex((p) => p.slug === slug);
+const project = projects[index];
 if (!project) return Astro.redirect("/");
 
-const details = project.details;
-const hasImages = details?.images && details.images.length > 0;
-const hasVideo = details?.videoUrl && details.videoUrl.length > 0;
-const hasHighlights = details?.highlights && details.highlights.length > 0;
-const hasRepo = details?.repoUrl && details.repoUrl.length > 0;
-const sections = (details as any)?.sections as
-  | { heading: string; body?: string; bullets?: string[] }[]
-  | undefined;
-const hasSections = sections && sections.length > 0;
+const d = project.details ?? {};
+const images = d.images ?? [];
+const highlights = d.highlights ?? [];
+const sections = d.sections ?? [];
+const stats = project.stats ?? [];
+const flow = project.flow ?? [];
+const frame = project.frame ?? "browser";
+const video = d.videoUrl;
+const isMp4 = !!video && /\.(mp4|webm)$/i.test(video);
+const prev = index > 0 ? projects[index - 1] : undefined;
+const next = index < projects.length - 1 ? projects[index + 1] : undefined;
+
+const meta = [
+  project.role && { label: "Role", value: project.role },
+  project.timeframe && { label: "Timeframe", value: project.timeframe },
+  project.team && { label: "Team", value: project.team },
+].filter(Boolean) as { label: string; value: string }[];
+
+const l = project.links ?? {};
+const links = [
+  l.demo && { label: "Live demo", href: l.demo, icon: "external" as IconName },
+  l.repo && { label: "Source code", href: l.repo, icon: "github" as IconName },
+  l.report && { label: "Read the report", href: l.report, icon: "file" as IconName },
+  l.video && { label: "Watch walkthrough", href: l.video, icon: "play" as IconName },
+].filter(Boolean) as { label: string; href: string; icon: IconName }[];
+
+const cs = project.caseStudy ?? {};
+const caseRows = [
+  cs.problem && { heading: "Problem", body: cs.problem },
+  cs.approach && { heading: "Approach", body: cs.approach },
+  cs.result && { heading: "Result", body: cs.result },
+  cs.lessons && { heading: "What I'd do differently", body: cs.lessons },
+].filter(Boolean) as { heading: string; body: string }[];
+
+// Sticky-left-heading rows: case-study fields first, then free-form sections.
+const rows = [...caseRows, ...sections];
+const showHeroMedia = images.length > 0 || !video;
 ---
-
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <meta
-      name="description"
-      content={`${project.name} — ${siteConfig.name}`}
-    />
-
-    <!-- Open Graph / social preview -->
-    <meta property="og:type" content="article" />
-    <meta property="og:title" content={`${project.name} — ${siteConfig.name}`} />
-    <meta property="og:description" content={project.description} />
-    <meta
-      property="og:url"
-      content={new URL(`/projects/${project.slug}`, Astro.site)}
-    />
-    <meta property="og:image" content={new URL("/og.png", Astro.site)} />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta
-      name="twitter:title"
-      content={`${project.name} — ${siteConfig.name}`}
-    />
-    <meta name="twitter:description" content={project.description} />
-    <meta name="twitter:image" content={new URL("/og.png", Astro.site)} />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap"
-      rel="stylesheet"
-    />
-    <title>{project.name} — {siteConfig.name}</title>
-  </head>
-  <body>
-    <!-- Top bar -->
-    <nav
-      class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50"
-    >
-      <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
-        <a
-          href="/#projects"
-          class="flex items-center gap-2 text-slate-400 hover:text-slate-100 transition-colors duration-200 text-sm font-medium shrink-0"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5M5 12l7 7M5 12l7-7" />
-          </svg>
-          Back
+<Base
+  title={`${project.name} — ${siteConfig.name}`}
+  description={project.description}
+  path={`/projects/${project.slug}`}
+  ogType="article"
+>
+  <article>
+    <header class="pt-[52px]">
+      <div class="container-x pt-12 sm:pt-16">
+        <a href="/#projects" class="link text-[0.9375rem]">
+          <Icon name="chevronLeft" size={16} /> All work
         </a>
-
-        <!-- Prev / Next in nav -->
-        <div class="flex items-center gap-4">
-          {projectIndex > 0 ? (
-            <a
-              href={`/projects/${siteConfig.projects[projectIndex - 1].slug}`}
-              class="group flex items-center gap-1.5 text-slate-400 hover:text-slate-100 transition-colors duration-200 text-sm"
-              title={siteConfig.projects[projectIndex - 1].name}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-0.5 transition-transform duration-200">
-                <path d="M19 12H5M5 12l7 7M5 12l7-7" />
-              </svg>
-              <span class="hidden sm:inline truncate max-w-[160px]">{siteConfig.projects[projectIndex - 1].name}</span>
-              <span class="sm:hidden">Prev</span>
-            </a>
-          ) : <div />}
-
-          <span class="text-slate-600 text-xs font-mono">{projectIndex + 1}/{siteConfig.projects.length}</span>
-
-          {projectIndex < siteConfig.projects.length - 1 ? (
-            <a
-              href={`/projects/${siteConfig.projects[projectIndex + 1].slug}`}
-              class="group flex items-center gap-1.5 text-slate-400 hover:text-slate-100 transition-colors duration-200 text-sm"
-              title={siteConfig.projects[projectIndex + 1].name}
-            >
-              <span class="hidden sm:inline truncate max-w-[160px]">{siteConfig.projects[projectIndex + 1].name}</span>
-              <span class="sm:hidden">Next</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-0.5 transition-transform duration-200">
-                <path d="M5 12h14M13 5l7 7-7 7" />
-              </svg>
-            </a>
-          ) : <div />}
+        <div class="mt-10 max-w-[52rem]">
+          {project.category && <p class="t-eyebrow load-in text-ink-2" style="--i:0">{project.category}</p>}
+          <h1 class="t-h1 load-in mt-3 text-ink" style="--i:1">{project.name}</h1>
+          <p class="t-lede load-in mt-6 text-ink-2" style="--i:2">{project.description}</p>
         </div>
-      </div>
-    </nav>
 
-    <main class="max-w-5xl mx-auto px-6 py-12 sm:py-16 md:py-24">
-      <!-- Header -->
-      <div class="mb-12">
-        <span
-          class="text-sm font-mono"
-          style={`color: ${siteConfig.accentColor}`}
-        >
-          0{projectIndex + 1}
-        </span>
-        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-100 mt-2 mb-6 leading-tight">
-          {project.name}
-        </h1>
-
-        <!-- Skills -->
-        {
-          project.skills && project.skills.length > 0 && (
-            <div class="flex flex-wrap gap-2">
-              {project.skills.map((skill) => (
-                <span class="px-3 py-1.5 bg-slate-800 text-slate-200 rounded-lg text-sm font-medium border border-slate-700">
-                  {skill}
-                </span>
-              ))}
-            </div>
-          )
-        }
-      </div>
-
-      <div
-        class="w-full h-px mb-12"
-        style={`background: linear-gradient(to right, ${siteConfig.accentColor}, transparent)`}
-      >
-      </div>
-
-      <!-- Full description -->
-      {
-        details?.fullDescription && (
-          <div class="mb-12">
-            <h2 class="text-xl font-semibold text-slate-100 mb-4">Overview</h2>
-            <p class="text-slate-400 text-lg leading-relaxed">
-              {details.fullDescription}
-            </p>
-          </div>
-        )
-      }
-
-      <!-- Highlights -->
-      {
-        hasHighlights && (
-          <div class="mb-12">
-            <h2 class="text-xl font-semibold text-slate-100 mb-4">
-              Key Highlights
-            </h2>
-            <ul class="space-y-3">
-              {details!.highlights!.map((point) => (
-                <li class="flex items-start gap-3">
-                  <span
-                    class="mt-2 w-1.5 h-1.5 rounded-full flex-shrink-0"
-                    style={`background-color: ${siteConfig.accentColor}`}
-                  />
-                  <span class="text-slate-400 text-base leading-relaxed">
-                    {point}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )
-      }
-
-      <!-- Sections — optional deep-dive content -->
-      {
-        hasSections && (
-          <div class="mb-12 space-y-10">
-            {sections!.map((section) => (
+        {meta.length > 0 && (
+          <dl class="load-in mt-8 flex flex-wrap gap-x-10 gap-y-4" style="--i:3">
+            {meta.map((m) => (
               <div>
-                <h2 class="text-xl font-semibold text-slate-100 mb-4">
-                  {section.heading}
-                </h2>
-                {section.body && (
-                  <p class="text-slate-400 text-base leading-relaxed">
-                    {section.body}
-                  </p>
-                )}
-                {section.bullets && section.bullets.length > 0 && (
-                  <ul class="space-y-3 mt-4">
-                    {section.bullets.map((point) => (
-                      <li class="flex items-start gap-3">
-                        <span
-                          class="mt-2 w-1.5 h-1.5 rounded-full flex-shrink-0"
-                          style={`background-color: ${siteConfig.accentColor}`}
-                        />
-                        <span class="text-slate-400 text-base leading-relaxed">
-                          {point}
-                        </span>
+                <dt class="t-eyebrow text-ink-3">{m.label}</dt>
+                <dd class="mt-1 text-ink">{m.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        {links.length > 0 && (
+          <div class="load-in mt-8 flex flex-wrap gap-3" style="--i:4">
+            {links.map((lk, i) => (
+              <a href={lk.href} target="_blank" rel="noopener noreferrer" class:list={["btn", i === 0 ? "btn-primary" : "btn-secondary"]}>
+                <Icon name={lk.icon} size={18} /> {lk.label}
+                <span class="sr-only">(opens in a new tab)</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {showHeroMedia && (
+        <div class="container-x load-in mt-12" style="--i:5">
+          <div class:list={[images.length > 0 && frame === "browser" && "max-h-[46rem] overflow-hidden rounded-card"]}>
+            <ProjectMedia project={project} variant="hero" eager index={index} />
+          </div>
+        </div>
+      )}
+    </header>
+
+    {stats.length > 0 && (
+      <section class="container-x mt-16" aria-label="Key figures">
+        <dl class:list={["reveal grid gap-5", stats.length === 1 ? "sm:grid-cols-1" : stats.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"]}>
+          {stats.map((s) => (
+            <div class="card flex flex-col-reverse gap-2 p-7">
+              <dt class="text-[0.9375rem] text-ink-2">{s.label}</dt>
+              <dd class="t-mono font-semibold text-ink" style="font-size: clamp(2.25rem, 4vw, 3.25rem); line-height: 1">{s.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    )}
+
+    {d.fullDescription && (
+      <section class="section-pad" aria-labelledby="overview">
+        <div class="container-x grid gap-6 lg:grid-cols-12 lg:gap-10">
+          <h2 id="overview" class="t-h2 reveal text-ink lg:col-span-4">Overview</h2>
+          <p class="reveal text-[1.1875rem] leading-[1.55] text-ink-2 lg:col-span-8">{d.fullDescription}</p>
+        </div>
+      </section>
+    )}
+
+    {flow.length > 0 && (
+      <section class="bg-bg-alt section-pad" aria-labelledby="flow-title">
+        <div class="container-x">
+          <h2 id="flow-title" class="t-h2 reveal text-ink">How it fits together</h2>
+          <ol class="reveal mt-10 grid gap-4 md:grid-flow-col md:auto-cols-fr">
+            {flow.map((step, i) => (
+              <li class="card relative flex flex-col gap-3 p-6">
+                <span class="t-mono text-[0.8125rem] font-semibold text-ink-3" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                <span class="font-semibold leading-snug text-ink">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    )}
+
+    {highlights.length > 0 && (
+      <section class="section-pad" aria-labelledby="highlights-title">
+        <div class="container-x grid gap-6 lg:grid-cols-12 lg:gap-10">
+          <h2 id="highlights-title" class="t-h2 reveal text-ink lg:col-span-4">Highlights</h2>
+          <ol class="lg:col-span-8">
+            {highlights.map((h, i) => (
+              <li class="reveal flex gap-5 border-t border-hair py-6 first:border-t-0 first:pt-0">
+                <span class="t-mono pt-1 text-[0.875rem] font-semibold text-accent-text" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                <span class="text-[1.0625rem] text-ink">{h}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    )}
+
+    {rows.length > 0 && (
+      <section class="pb-[clamp(5rem,12vw,10rem)]" aria-label="Case study">
+        <div class="container-x">
+          {rows.map((row) => (
+            <div class="reveal grid gap-4 border-t border-hair py-12 lg:grid-cols-12 lg:gap-10">
+              <h2 class="t-h3 text-ink lg:col-span-4"><span class="lg:sticky lg:top-24 block">{row.heading}</span></h2>
+              <div class="lg:col-span-8">
+                {row.body && <p class="text-[1.0625rem] leading-[1.6] text-ink-2">{row.body}</p>}
+                {"bullets" in row && row.bullets && row.bullets.length > 0 && (
+                  <ul class="mt-4 space-y-4 text-ink-2">
+                    {row.bullets.map((b) => (
+                      <li class="flex gap-3">
+                        <span class="mt-[0.65em] h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--text-3)]" aria-hidden="true" />
+                        <span class="leading-[1.6]">{b}</span>
                       </li>
                     ))}
                   </ul>
                 )}
               </div>
-            ))}
-          </div>
-        )
-      }
-
-      <!-- Video — only shown when a URL is set -->
-      {hasVideo && (
-        <div class="mb-12">
-          <h2 class="text-xl font-semibold text-slate-100 mb-4">Demo</h2>
-          {details!.videoUrl!.endsWith(".mp4") ? (
-            <video
-              src={details!.videoUrl}
-              class="w-full rounded-xl border border-slate-700 bg-slate-800"
-              controls
-              preload="metadata"
-            />
-          ) : (
-            <div class="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-700">
-              <iframe
-                src={details!.videoUrl}
-                title={`${project.name} demo`}
-                class="absolute inset-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              />
             </div>
-          )}
+          ))}
         </div>
-      )}
+      </section>
+    )}
 
-      <!-- Images — only shown when images are set -->
-      {hasImages && (
-        <div class="mb-12">
-          <h2 class="text-xl font-semibold text-slate-100 mb-4">Screenshots</h2>
-          <div class={`grid gap-4 ${details!.images!.length === 1 ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"}`}>
-            {details!.images!.map((src) => (
-              <div class="rounded-xl overflow-hidden border border-slate-700 bg-slate-800">
-                <img
-                  src={src}
-                  alt={project.name}
-                  class="w-full h-auto object-cover"
+    {video && (
+      <section class="section-pad border-t border-hair" aria-labelledby="demo-title">
+        <div class="container-x">
+          <h2 id="demo-title" class="t-h2 reveal text-ink">Demo</h2>
+          <p class="reveal mt-3 max-w-[40rem] text-ink-2">
+            Screen recording of the project. It has no captions; the sections above describe what it shows.
+          </p>
+          <div class="reveal mt-10 overflow-hidden rounded-card border border-hair bg-surface">
+            {isMp4 ? (
+              <video
+                class="block aspect-video w-full bg-bg-alt"
+                controls
+                playsinline
+                preload="none"
+                poster={d.videoPoster}
+                aria-label={`${project.name} demo video`}
+              >
+                <source src={video} type="video/mp4" />
+                <a href={video} class="link">Download the demo video</a>
+              </video>
+            ) : (
+              <div class="relative aspect-video w-full">
+                <iframe
+                  src={video}
+                  title={`${project.name} demo`}
+                  class="absolute inset-0 h-full w-full"
                   loading="lazy"
+                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
                 />
               </div>
-            ))}
+            )}
           </div>
         </div>
-      )}
+      </section>
+    )}
 
-      <!-- Repo / external link -->
-      {
-        hasRepo && (
-          <div class="mb-12">
-            <a
-              href={details!.repoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-              style={`background-color: ${siteConfig.accentColor}`}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
-              </svg>
-              View Repository
-            </a>
+    {images.length > 0 && (
+      <section class="section-pad bg-bg-alt" aria-labelledby="gallery-title">
+        <div class="container-x flex items-end justify-between gap-4">
+          <div>
+            <h2 id="gallery-title" class="t-h2 reveal text-ink">Gallery</h2>
+            <p class="mt-2 text-[0.9375rem] text-ink-3">{images.length} screens. Scroll sideways or use the arrows.</p>
           </div>
-        )
-      }
+          <div class="hidden gap-2 sm:flex" data-gallery-controls hidden>
+            <button type="button" class="btn btn-secondary h-11 w-11 !px-0" data-dir="-1" aria-label="Previous screenshots"><Icon name="chevronLeft" size={20} /></button>
+            <button type="button" class="btn btn-secondary h-11 w-11 !px-0" data-dir="1" aria-label="Next screenshots"><Icon name="chevronRight" size={20} /></button>
+          </div>
+        </div>
+        <div class="mx-auto mt-10 max-w-[1120px] lg:px-[24px]">
+          <ul
+            class:list={["gallery", frame === "browser" && "gallery-desktop"]}
+            tabindex="0"
+            role="list"
+            aria-label={`${project.name} screenshots`}
+            data-gallery
+          >
+            {images.map((img) => (
+              <li>
+                <figure>
+                  {frame === "browser" ? (
+                    <div class="frame">
+                      <div class="frame-bar" aria-hidden="true"><i /><i /><i /></div>
+                      <Picture src={img.src} alt={img.alt} imgClass="dim block w-full h-auto" />
+                    </div>
+                  ) : (
+                    <div class="frame">
+                      <Picture src={img.src} alt={img.alt} imgClass="dim block h-[min(34rem,70svh)] w-auto" />
+                    </div>
+                  )}
+                  {img.caption && <figcaption class="mt-4 text-[0.9375rem] text-ink-2">{img.caption}</figcaption>}
+                </figure>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )}
 
-    </main>
-  </body>
-</html>
+    {(prev || next) && (
+      <nav class="container-x grid gap-5 py-16 sm:grid-cols-2" aria-label="More projects">
+        {prev ? (
+          <a href={`/projects/${prev.slug}`} class="card group flex flex-col gap-2 p-7 transition-shadow hover:shadow-[var(--shadow-md)]">
+            <span class="t-eyebrow inline-flex items-center gap-1 text-ink-3"><Icon name="chevronLeft" size={14} /> Previous</span>
+            <span class="t-h3 text-ink">{prev.name}</span>
+          </a>
+        ) : <span class="hidden sm:block" />}
+        {next && (
+          <a href={`/projects/${next.slug}`} class="card group flex flex-col items-end gap-2 p-7 text-right transition-shadow hover:shadow-[var(--shadow-md)]">
+            <span class="t-eyebrow inline-flex items-center gap-1 text-ink-3">Next <Icon name="chevronRight" size={14} /></span>
+            <span class="t-h3 text-ink">{next.name}</span>
+          </a>
+        )}
+      </nav>
+    )}
+  </article>
+</Base>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-gallery]").forEach((track) => {
+    const controls = track.closest("section")?.querySelector<HTMLElement>("[data-gallery-controls]");
+    if (!controls) return;
+    controls.hidden = false;
+    const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+    controls.querySelectorAll<HTMLButtonElement>("[data-dir]").forEach((b) =>
+      b.addEventListener("click", () => {
+        const dir = Number(b.dataset.dir);
+        track.scrollBy({ left: dir * track.clientWidth * 0.8, behavior: smooth ? "smooth" : "auto" });
+      }),
+    );
+  });
+</script>

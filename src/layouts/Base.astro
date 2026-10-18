@@ -1,0 +1,113 @@
+---
+import "@fontsource-variable/inter/wght.css";
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { siteConfig } from "../config";
+
+interface Props {
+  title: string;
+  description: string;
+  path?: string;
+  ogType?: "website" | "article";
+  /** Section ids shown in the nav are only highlighted on the home page. */
+  isHome?: boolean;
+}
+const { title, description, path = "/", ogType = "website", isHome = false } = Astro.props;
+const url = new URL(path, Astro.site);
+const ogImage = new URL("/og.png", Astro.site);
+const accent = siteConfig.accentColor;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000" />
+    <script is:inline>
+      // Theme before paint. A stored choice (from the toggle) wins; otherwise
+      // follow the OS, and keep following it live until the user picks one.
+      // window.__setTheme is the single place the theme is applied, so the
+      // toggle, OS changes and other tabs all update the same things.
+      (function () {
+        var root = document.documentElement;
+        var mq = window.matchMedia ? matchMedia("(prefers-color-scheme: dark)") : null;
+        function stored() {
+          try { var t = localStorage.getItem("theme"); return t === "light" || t === "dark" ? t : null; } catch (e) { return null; }
+        }
+        function apply(t) {
+          root.setAttribute("data-theme", t);
+          // Browser UI colour follows the active theme, not just the OS.
+          var metas = document.querySelectorAll('meta[name="theme-color"]');
+          for (var i = 0; i < metas.length; i++) {
+            metas[i].removeAttribute("media");
+            metas[i].setAttribute("content", t === "dark" ? "#000000" : "#ffffff");
+          }
+          document.dispatchEvent(new CustomEvent("themechange", { detail: t }));
+        }
+        window.__setTheme = function (t, persist) {
+          if (persist) { try { localStorage.setItem("theme", t); } catch (e) {} }
+          apply(t);
+        };
+        apply(stored() || (mq && mq.matches ? "dark" : "light"));
+        if (mq && mq.addEventListener) {
+          mq.addEventListener("change", function (e) { if (!stored()) apply(e.matches ? "dark" : "light"); });
+        }
+        window.addEventListener("storage", function (e) {
+          if (e.key === "theme") apply(stored() || (mq && mq.matches ? "dark" : "light"));
+        });
+      })();
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={url} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={url} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <title>{title}</title>
+    {accent && <style set:html={`:root{--accent:${accent};--accent-hover:${accent};}`} />}
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <Header isHome={isHome} />
+    <main id="main" tabindex="-1" class="outline-none">
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      // Scroll reveal fallback for browsers without scroll-driven animations.
+      // Content stays visible without JS: data-io is only added here.
+      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!CSS.supports("animation-timeline: view()") && !reduce && "IntersectionObserver" in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                e.target.classList.add("in");
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+        );
+        document.querySelectorAll<HTMLElement>(".reveal").forEach((el) => {
+          // Elements already on screen are shown immediately (no flash).
+          const r = el.getBoundingClientRect();
+          if (r.top < innerHeight && r.bottom > 0) return;
+          el.dataset.io = "";
+          io.observe(el);
+        });
+      }
+    </script>
+  </body>
+</html>

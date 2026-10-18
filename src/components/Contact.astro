@@ -1,0 +1,254 @@
+---
+import { siteConfig } from "../config";
+import Icon from "./Icon.astro";
+
+// The owner's email address is never rendered: messages go through the
+// contact form (functions/api/contact.ts on Cloudflare Pages), which reads the
+// recipient from an environment variable.
+const { linkedin, github, twitter } = siteConfig.social;
+const endpoint = siteConfig.contact?.formEndpoint;
+const has = !!(endpoint || linkedin || github || twitter);
+const heading = siteConfig.contact?.heading ?? "Get in touch.";
+const body = siteConfig.contact?.body;
+const turnstileSiteKey = siteConfig.contact?.turnstileSiteKey;
+
+// Keep in sync with the constants at the top of functions/api/contact.ts.
+const MAX = { name: 80, email: 254, message: 1000 };
+const MIN_MESSAGE = 10;
+const fmt = (n: number) => n.toLocaleString("en-GB");
+---
+{
+  has && (
+    <section id="contact" class="section-pad bg-bg text-center" aria-labelledby="contact-title">
+      <div class="container-x reveal flex flex-col items-center">
+        <h2 id="contact-title" class="t-display text-ink" style="font-size: clamp(2.75rem, 7vw + 1rem, 5.5rem)">{heading}</h2>
+        {body && <p class="t-lede mt-6 max-w-[36rem] text-ink-2">{body}</p>}
+
+        {endpoint && (
+          <form
+            class="mt-12 w-full max-w-[36rem] text-left"
+            action={endpoint}
+            method="post"
+            data-contact-form
+            aria-describedby="contact-status"
+          >
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label for="cf-name" class="mb-2 block text-[0.9375rem] font-medium text-ink">Name</label>
+                <input id="cf-name" name="name" type="text" class="field" required maxlength={MAX.name} autocomplete="name" aria-describedby="cf-name-err" />
+                <p id="cf-name-err" class="mt-1.5 text-[0.875rem] text-danger" data-field-error="name" hidden></p>
+              </div>
+              <div>
+                <label for="cf-email" class="mb-2 block text-[0.9375rem] font-medium text-ink">Your email</label>
+                <input id="cf-email" name="email" type="email" class="field" required maxlength={MAX.email} autocomplete="email" inputmode="email" aria-describedby="cf-email-err" />
+                <p id="cf-email-err" class="mt-1.5 text-[0.875rem] text-danger" data-field-error="email" hidden></p>
+              </div>
+            </div>
+            <div class="mt-5">
+              <label for="cf-message" class="mb-2 block text-[0.9375rem] font-medium text-ink">Message</label>
+              <textarea id="cf-message" name="message" class="field" required minlength={MIN_MESSAGE} maxlength={MAX.message} rows="6" aria-describedby="cf-message-hint cf-message-count cf-message-err" data-message></textarea>
+              <div class="mt-1.5 flex items-baseline justify-between gap-4 text-[0.875rem] text-ink-3">
+                <p id="cf-message-hint">{MIN_MESSAGE} to {fmt(MAX.message)} characters, up to 2 links.</p>
+                {/* Visible counter (read with the field's description, not live). Shown by JS. */}
+                <p id="cf-message-count" class="shrink-0 tabular-nums" data-count data-max={MAX.message} hidden>0 / {fmt(MAX.message)}</p>
+              </div>
+              {/* Polite announcements only when crossing thresholds near the limit. */}
+              <p class="sr-only" aria-live="polite" data-count-live></p>
+              <p id="cf-message-err" class="mt-1.5 text-[0.875rem] text-danger" data-field-error="message" hidden></p>
+            </div>
+
+            {/* Honeypot: hidden from people and assistive tech; bots that fill it are dropped. */}
+            <div class="hp" aria-hidden="true">
+              <label for="cf-website">Leave this field empty</label>
+              <input id="cf-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+            </div>
+            <input type="hidden" name="t" value="" data-started />
+
+            {turnstileSiteKey && (
+              <div class="mt-6">
+                <p id="cf-turnstile-hint" class="mb-2 text-[0.875rem] text-ink-3">Quick check to keep spam out.</p>
+                <div data-turnstile data-sitekey={turnstileSiteKey} data-api="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=__onTurnstileLoad" role="group" aria-labelledby="cf-turnstile-hint"></div>
+                <noscript><p class="mt-2 text-[0.875rem] text-ink-2">The spam check needs JavaScript. Please enable it to send a message, or reach me on LinkedIn.</p></noscript>
+              </div>
+            )}
+
+            <div class="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <button type="submit" class="btn btn-primary" data-submit>
+                <Icon name="mail" size={18} /> <span data-submit-label>Send message</span>
+              </button>
+              {siteConfig.cvUrl && (
+                <a href={siteConfig.cvUrl} class="btn btn-secondary" download>
+                  <Icon name="download" size={18} /> Download CV
+                </a>
+              )}
+            </div>
+            <p id="contact-status" class="mt-5 min-h-[1.5rem] text-[0.9375rem]" role="status" aria-live="polite" data-status tabindex="-1"></p>
+          </form>
+        )}
+
+        {!endpoint && siteConfig.cvUrl && (
+          <div class="mt-10">
+            <a href={siteConfig.cvUrl} class="btn btn-secondary" download>
+              <Icon name="download" size={18} /> Download CV
+            </a>
+          </div>
+        )}
+
+        {(linkedin || github || twitter) && (
+          <ul class="mt-10 flex items-center gap-2" aria-label="Profiles">
+            {linkedin && (
+              <li><a href={linkedin} target="_blank" rel="noopener noreferrer" class="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink-2 hover:text-ink" aria-label="LinkedIn (opens in a new tab)"><Icon name="linkedin" size={24} /></a></li>
+            )}
+            {github && (
+              <li><a href={github} target="_blank" rel="noopener noreferrer" class="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink-2 hover:text-ink" aria-label="GitHub (opens in a new tab)"><Icon name="github" size={24} /></a></li>
+            )}
+            {twitter && (
+              <li><a href={twitter} target="_blank" rel="noopener noreferrer" class="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink-2 hover:text-ink" aria-label="X / Twitter (opens in a new tab)"><Icon name="x" size={24} /></a></li>
+            )}
+          </ul>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<script>
+  // Progressive enhancement: without JS the form does a normal POST and the
+  // function answers with a small HTML page. With JS it posts JSON via fetch.
+  document.querySelectorAll<HTMLFormElement>("[data-contact-form]").forEach((form) => {
+    const started = form.querySelector<HTMLInputElement>("[data-started]")!;
+    started.value = String(Date.now());
+    const button = form.querySelector<HTMLButtonElement>("[data-submit]")!;
+    const label = form.querySelector<HTMLElement>("[data-submit-label]")!;
+    const status = form.querySelector<HTMLElement>("[data-status]")!;
+    const idle = label.textContent;
+
+    // Live character counter. The visible count updates on every input but is
+    // not a live region; screen readers hear it with the field description and
+    // get one polite announcement when crossing 100 left, 25 left and the limit.
+    const textarea = form.querySelector<HTMLTextAreaElement>("[data-message]");
+    const count = form.querySelector<HTMLElement>("[data-count]");
+    const live = form.querySelector<HTMLElement>("[data-count-live]");
+    let lastBand = -1;
+    const updateCount = () => {
+      if (!textarea || !count || !live) return;
+      const max = Number(count.dataset.max);
+      const left = max - textarea.value.length;
+      count.textContent = `${textarea.value.length.toLocaleString("en-GB")} / ${max.toLocaleString("en-GB")}`;
+      count.classList.toggle("text-danger", left <= 25);
+      count.classList.toggle("font-medium", left <= 25);
+      const band = left <= 0 ? 3 : left <= 25 ? 2 : left <= 100 ? 1 : 0;
+      if (band > lastBand && band > 0 && lastBand !== -1) {
+        live.textContent = left <= 0 ? "Character limit reached." : `${left} characters left.`;
+      } else if (band === 0) {
+        live.textContent = "";
+      }
+      lastBand = band;
+    };
+    if (count) count.hidden = false;
+    textarea?.addEventListener("input", updateCount);
+    updateCount();
+
+    // Optional Cloudflare Turnstile, rendered explicitly so it follows the
+    // site theme (data-theme on <html>) and can be reset after each attempt.
+    const tsBox = form.querySelector<HTMLElement>("[data-turnstile]");
+    type TS = {
+      render: (el: HTMLElement, opts: Record<string, unknown>) => string;
+      reset: (id?: string) => void;
+      remove: (id: string) => void;
+    };
+    const ts = () => (window as unknown as { turnstile?: TS }).turnstile;
+    let tsId: string | undefined;
+    const renderTurnstile = () => {
+      const api = ts();
+      if (!tsBox || !api) return;
+      if (tsId) api.remove(tsId);
+      tsId = api.render(tsBox, {
+        sitekey: tsBox.dataset.sitekey,
+        theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+        language: "en",
+      });
+    };
+    if (tsBox) {
+      const w = window as unknown as Record<string, unknown>;
+      w.__onTurnstileLoad = renderTurnstile;
+      if (ts()) renderTurnstile();
+      else if (!document.querySelector("script[data-turnstile-api]")) {
+        const s = document.createElement("script");
+        s.src = tsBox.dataset.api!; // URL lives in the markup, so it is only in the page when Turnstile is on
+        s.async = true;
+        s.defer = true;
+        s.dataset.turnstileApi = "";
+        document.head.appendChild(s);
+      }
+      document.addEventListener("themechange", renderTurnstile);
+    }
+
+    const setStatus = (text: string, kind: "ok" | "error" | "") => {
+      status.textContent = text;
+      status.classList.toggle("text-danger", kind === "error");
+      status.classList.toggle("text-ink", kind !== "error");
+      status.classList.toggle("font-medium", kind !== "");
+    };
+    const clearFieldErrors = () => {
+      form.querySelectorAll<HTMLElement>("[data-field-error]").forEach((p) => {
+        p.hidden = true;
+        p.textContent = "";
+        const input = form.elements.namedItem(p.dataset.fieldError!);
+        if (input instanceof HTMLElement) input.removeAttribute("aria-invalid");
+      });
+    };
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault(); // native validation has already passed
+      clearFieldErrors();
+      const data = Object.fromEntries(new FormData(form).entries());
+      button.disabled = true;
+      form.setAttribute("aria-busy", "true");
+      label.textContent = "Sending…";
+      setStatus("Sending your message…", "");
+      try {
+        const res = await fetch(form.action, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(data),
+        });
+        const json = (await res.json().catch(() => ({}))) as {
+          ok?: boolean;
+          error?: string;
+          fields?: Record<string, string>;
+        };
+        if (res.ok && json.ok) {
+          form.reset();
+          started.value = String(Date.now());
+          updateCount();
+          setStatus("Thanks, your message has been sent. I'll reply to the email you gave.", "ok");
+          status.focus();
+          return;
+        }
+        let firstBad: HTMLElement | null = null;
+        for (const [name, msg] of Object.entries(json.fields ?? {})) {
+          const err = form.querySelector<HTMLElement>(`[data-field-error="${name}"]`);
+          const input = form.elements.namedItem(name);
+          if (err && input instanceof HTMLElement) {
+            err.textContent = msg;
+            err.hidden = false;
+            input.setAttribute("aria-invalid", "true");
+            firstBad ??= input;
+          }
+        }
+        setStatus(json.error ?? "Sorry, the message could not be sent. Please try again later.", "error");
+        (firstBad ?? status).focus();
+      } catch {
+        setStatus("Network error: the message was not sent. Check your connection and try again.", "error");
+        status.focus();
+      } finally {
+        // A Turnstile token is single use: get a fresh one for the next try.
+        if (tsId) ts()?.reset(tsId);
+        button.disabled = false;
+        form.removeAttribute("aria-busy");
+        label.textContent = idle;
+      }
+    });
+  });
+</script>

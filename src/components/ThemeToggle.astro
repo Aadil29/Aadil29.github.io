@@ -1,0 +1,41 @@
+---
+import Icon from "./Icon.astro";
+interface Props { class?: string }
+const { class: className = "" } = Astro.props;
+---
+<button
+  type="button"
+  data-theme-toggle
+  class:list={["inline-flex h-11 w-11 items-center justify-center rounded-full text-ink-2 transition-colors hover:text-ink hover:bg-[color:var(--hairline)]", className]}
+  aria-label="Switch to dark theme"
+  hidden
+>
+  <span class="theme-icon-moon"><Icon name="moon" size={18} /></span>
+  <span class="theme-icon-sun hidden"><Icon name="sun" size={18} /></span>
+</button>
+
+<script>
+  // Theme is applied by window.__setTheme (inline script in Base.astro), which
+  // also fires "themechange" for OS changes and other tabs; this keeps every
+  // toggle's icon and label in sync with it.
+  function sync() {
+    const dark = document.documentElement.dataset.theme === "dark";
+    document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((b) => {
+      b.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+      b.querySelector(".theme-icon-moon")?.classList.toggle("hidden", dark);
+      b.querySelector(".theme-icon-sun")?.classList.toggle("hidden", !dark);
+    });
+  }
+  sync();
+  document.addEventListener("themechange", sync);
+  document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((b) => {
+    b.hidden = false; // needs JS, so only shown when it can work
+    b.addEventListener("click", () => {
+      const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      const set = (window as unknown as { __setTheme?: (t: string, persist: boolean) => void }).__setTheme;
+      if (set) set(next, true);
+      else document.documentElement.dataset.theme = next;
+      sync();
+    });
+  });
+</script>

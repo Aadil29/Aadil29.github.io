@@ -1,73 +1,43 @@
 ---
 import { siteConfig } from "../config";
-const hasExperience = siteConfig.experience && siteConfig.experience.length > 0;
+const experience = siteConfig.experience ?? [];
 ---
-
 {
-  hasExperience && (
-    <section id="experience" class="p-8 sm:p-12 md:p-16 lg:p-24">
-      <div>
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
-          <div class="lg:col-span-4">
-            <h2 class="text-3xl sm:text-4xl md:text-5xl xl:text-7xl font-bold text-slate-100">
-              Experience
-            </h2>
-            <div
-              class="w-[75px] h-[5px] mt-2 rounded-full"
-              style={`background-color: ${siteConfig.accentColor}`}
-            />
-          </div>
+  experience.length > 0 && (
+    <section id="experience" class="section-pad" aria-labelledby="experience-title">
+      <div class="container-x">
+        <h2 id="experience-title" class="t-h1 reveal text-ink">Experience.</h2>
 
-          <div class="lg:col-span-8">
-            <div class="relative">
-              {siteConfig.experience.map((exp, index) => (
-                <div class="relative mb-12 last:mb-0">
-                  {/* Timeline dot at top of card */}
-                  <div
-                    class="absolute left-1/2 -top-2 w-4 h-4 bg-white border-2 rounded-full -translate-x-1/2 z-20 transition-all duration-300"
-                    style={`border-color: ${siteConfig.accentColor}; background-color: ${siteConfig.accentColor}`}
-                  />
-
-                  {/* Connecting line below card */}
-                  {index < siteConfig.experience.length - 1 && (
-                    <div class="absolute left-1/2 bottom-0 w-0.5 h-12 bg-slate-600 -translate-x-1/2 translate-y-full z-10" />
-                  )}
-
-                  {/* Experience card */}
-                  <div class="bg-slate-800 rounded-lg shadow-sm border border-slate-700 p-4 sm:p-5 md:p-6 hover:shadow-md transition-shadow duration-300">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                      <div>
-                        <h3 class="text-lg sm:text-xl font-semibold text-slate-100">
-                          {exp.title}
-                        </h3>
-                        <p
-                          class="text-base sm:text-lg"
-                          style={`color: ${siteConfig.accentColor}`}
-                        >
-                          {exp.company}
-                        </p>
-                      </div>
-                      <span class="text-xs sm:text-sm text-slate-400 mt-2 sm:mt-0">
-                        {exp.dateRange}
-                      </span>
-                    </div>
-
-                    <ul class="space-y-2">
-                      {exp.bullets.map((bullet) => (
-                        <li class="flex items-start">
-                          <span class="inline-block w-1.5 h-1.5 rounded-full bg-slate-500 mt-2 mr-3 flex-shrink-0" />
-                          <span class="text-sm sm:text-base text-slate-400">
-                            {bullet}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+        <ol class="mt-14 border-t border-hair">
+          {experience.map((exp) => (
+            <li class="reveal grid gap-4 border-b border-hair py-10 lg:grid-cols-12 lg:gap-10">
+              <div class="lg:col-span-4">
+                <div class="lg:sticky lg:top-24">
+                  <p class="t-h3 text-ink">{exp.company}</p>
+                  <p class="mt-1 text-[0.9375rem] text-ink-3">{exp.dateRange}</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+              </div>
+              <div class="lg:col-span-8">
+                <h3 class="t-h2 text-ink">{exp.title}</h3>
+                {exp.bullets.length > 0 && (
+                  <ul class="mt-5 space-y-3 text-ink-2">
+                    {exp.bullets.map((b) => (
+                      <li class="flex gap-3">
+                        <span class="mt-[0.65em] h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--text-3)]" aria-hidden="true" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {exp.skills && exp.skills.length > 0 && (
+                  <ul class="mt-5 flex flex-wrap gap-1.5" aria-label="Technologies">
+                    {exp.skills.map((t) => <li class="tag">{t}</li>)}
+                  </ul>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   )

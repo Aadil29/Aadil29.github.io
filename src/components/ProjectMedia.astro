@@ -1,0 +1,91 @@
+---
+// Visual for a project: browser-framed screenshot (desktop UI), a pair of
+// phone-framed screenshots (mobile UI), or a designed non-image tile when the
+// project has no screenshots. Used on the home bento grid and detail page.
+import type { Project } from "../config";
+import Picture from "./Picture.astro";
+import Icon, { type IconName } from "./Icon.astro";
+
+interface Props {
+  project: Project;
+  index?: number;
+  /** "card" = home tile, "hero" = detail page header */
+  variant?: "card" | "hero";
+  eager?: boolean;
+}
+const { project, index = 0, variant = "card", eager = false } = Astro.props;
+const images = project.details?.images ?? [];
+const frame = project.frame ?? "browser";
+const loading = eager ? "eager" : "lazy";
+const isHero = variant === "hero";
+
+// Fallback tile content comes from config only. Card: first stat, else the
+// flow stages, else the category. Hero: the category (stats and flow get their
+// own sections on the detail page).
+const stat = project.stats?.[0];
+const flow = project.flow ?? [];
+const iconFor = (p: Project): IconName => {
+  const s = `${p.category ?? ""} ${(p.skills ?? []).join(" ")}`.toLowerCase();
+  if (s.includes("penetration") || s.includes("burp")) return "bug";
+  if (s.includes("devsecops") || s.includes("terraform")) return "cloud";
+  if (s.includes("audio") || s.includes("speaker")) return "wave";
+  return "shield";
+};
+const hue = index % 2 ? "hue-teal" : "";
+---
+{
+  images.length > 0 && frame === "browser" && (
+    <div class:list={["relative h-full w-full overflow-hidden bg-bg-alt", isHero ? "rounded-card p-4 sm:p-8 md:p-12" : "flex items-center p-5 sm:p-8"]}>
+      <div class="frame media-zoom w-full">
+        <div class="frame-bar" aria-hidden="true"><i /><i /><i /></div>
+        <Picture
+          src={images[0].src}
+          alt={images[0].alt}
+          loading={loading}
+          fetchpriority={eager ? "high" : undefined}
+          imgClass="dim block w-full h-auto"
+        />
+      </div>
+    </div>
+  )
+}
+{
+  images.length > 0 && frame === "phone" && (
+    <div class:list={["relative flex h-full w-full items-start justify-center gap-4 overflow-hidden bg-bg-alt sm:gap-6", isHero ? "rounded-card px-6 pt-10 pb-0 sm:pt-14 max-h-[44rem]" : "px-6 pt-8"]}>
+      {images.slice(0, 2).map((img, i) => (
+        <div class:list={["phone media-zoom shrink-0", isHero ? "w-[44%] max-w-[270px]" : "w-[42%] max-w-[210px]", i === 1 && "mt-10 sm:mt-14"]}>
+          <div class="screen">
+            <Picture src={img.src} alt={img.alt} loading={loading} imgClass="dim" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+{
+  images.length === 0 && (
+    <div
+      class:list={["tile-art flex h-full w-full flex-col justify-between", hue, isHero ? "rounded-card min-h-[18rem] p-8 sm:p-12" : "min-h-[11rem] p-6 sm:p-8"]}
+      aria-hidden="true"
+    >
+      <Icon name={iconFor(project)} size={isHero ? 40 : 32} stroke={1.5} class="opacity-90" />
+      {stat && !isHero ? (
+        <div>
+          <p class="t-mono font-semibold leading-none tracking-tight" style="font-size: clamp(3rem, 6vw, 5.5rem)">{stat.value}</p>
+          <p class="art-sub mt-3 max-w-[22rem] text-[0.9375rem]">{stat.label}</p>
+        </div>
+      ) : flow.length > 0 && !isHero ? (
+        <ol class="flex flex-wrap items-center gap-x-2 gap-y-2 text-[0.8125rem]" aria-label="Pipeline stages">
+          {flow.map((step, i) => (
+            <li class="flex items-center gap-2">
+              <span class="tile-chip rounded-full px-3 py-1.5 font-medium">{step}</span>
+              {i < flow.length - 1 && <Icon name="chevronRight" size={14} class="opacity-70" />}
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p class="t-h1">{project.category ?? project.name}</p>
+      )}
+    </div>
+  )
+}
